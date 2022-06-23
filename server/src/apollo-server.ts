@@ -3,7 +3,6 @@ import { ApolloServer, ExpressContext, gql } from 'apollo-server-express';
 import * as express from 'express';
 import { Server } from 'http';
 import Db from './db';
-
 export async function createApolloServer(
   db: Db,
   httpServer: Server,
@@ -30,12 +29,30 @@ export async function createApolloServer(
       reason: String!
     }
   `;
+  const resolvers = {
+    Query: {
+      currentUser: () => {
+        return {
+          id: '123',
+          name: 'John Doe',
+          handle: 'johndoe',
+          coverUrl: '',
+          avatarUrl: '',
+          createdAt: '',
+          updatedAt: '',
+        };
+      },
+      suggestions: () => {
+        return [];
+      },
+    },
+  };
 
   const server = new ApolloServer({
     typeDefs,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     resolvers,
     context: () => ({ db }),
-    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
   await server.start();
   server.applyMiddleware({ app });
